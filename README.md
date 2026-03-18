@@ -27,5 +27,5 @@ node src/server.js
 - File validation by type and size
 - Integration with Python inference pipeline
 - Temporary file cleanup after processing
-- Return prediction result and confidence score
+- Return prediction result and confidence score```
 
