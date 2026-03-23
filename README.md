@@ -1,6 +1,9 @@
 # RealVision Deepfake Detection Backend
 
-Backend API for the RealVision project. This service is being built to support video upload and future prediction of whether a video is real or fake using a deep learning model.
+Node.js/Express backend for the RealVision project, currently focused on video upload, validation, and API flow design
+as preparation for future deepfake model integration.
+
+---
 
 ## Current Stack
 - Node.js
@@ -15,6 +18,9 @@ Backend API for the RealVision project. This service is being built to support v
 ```bash
 npm install
 node src/server.js
+```
+
+---
 
 ## Current Functionality
 - Express backend setup
@@ -24,8 +30,25 @@ node src/server.js
 - File type validation (video only)
 - File size limit (50MB)
 
+---
+
+## API Validation Examples
+
+The backend currently supports video upload with validation checks for file type and file size.
+
+### Successful upload
+A valid video file is accepted and stored temporarily, with upload details returned in the response.
+
+![Successful upload](images/upload-success.png)
+
+### File size limit validation
+Files that exceed the configured size limit are rejected with an error response.
+
+![File too large](images/file-too-large.png)
+
+---
+
 ## Planned Improvements
 - Integration with Python inference pipeline
 - Temporary file cleanup after processing
 - Return prediction result and confidence score
-
