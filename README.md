@@ -39,7 +39,7 @@ The backend currently supports video upload with validation checks for file type
 ### Successful upload
 A valid video file is accepted and stored temporarily, with upload details returned in the response.
 
-![Successful upload](images/upload-success.png)
+![Successful upload](images/upload-successful.png)
 
 ### File size limit validation
 Files that exceed the configured size limit are rejected with an error response.
