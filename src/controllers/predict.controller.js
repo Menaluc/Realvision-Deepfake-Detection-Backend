@@ -2,6 +2,10 @@ const multer = require('multer');
 const { runInference } = require('../services/inference.service');
 const { unlinkQuietly } = require('../utils/file.utils');
 
+/**
+ * Handles upload outcomes + inference response for POST /api/predict.
+ * Multer errors are received via the `err` argument from the route wrapper.
+ */
 async function predict(req, res, err) {
   if (err instanceof multer.MulterError) {
     console.log(err);
@@ -27,6 +31,7 @@ async function predict(req, res, err) {
   const videoPath = req.file.path;
 
   try {
+    // In demo mode this calls mock inference (no Python process).
     const inferenceResult = await runInference(videoPath);
     console.log('[POST /api/predict mock]', inferenceResult);
     return res
@@ -44,6 +49,7 @@ async function predict(req, res, err) {
       confidence: null,
     });
   } finally {
+    // Uploaded files are temporary; always attempt cleanup.
     unlinkQuietly(videoPath);
   }
 }

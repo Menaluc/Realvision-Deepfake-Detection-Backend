@@ -4,6 +4,7 @@ const path = require('path');
 const config = require('../config');
 const predictController = require('../controllers/predict.controller');
 
+// Route-level upload setup: validates file type/size before controller logic runs.
 const router = express.Router();
 
 const storage = multer.diskStorage({
@@ -35,6 +36,7 @@ const upload = multer({
   },
 });
 
+// Multer is invoked inline to capture upload errors and pass them to the controller.
 router.post('/predict', (req, res, next) => {
   upload.single('video')(req, res, (err) => {
     predictController.predict(req, res, err).catch(next);

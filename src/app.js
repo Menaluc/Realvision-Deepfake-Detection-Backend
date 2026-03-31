@@ -4,6 +4,7 @@ const app = express();
 const predictRoutes = require('./routes/predict.routes');
 const errorMiddleware = require('./middleware/error.middleware');
 
+// Main Express composition: static demo, API routes, and final error middleware.
 // Allow demo UI opened from file:// or another localhost port to call the API on :3000.
 app.use((req, res, next) => {
   res.set('Access-Control-Allow-Origin', '*');
@@ -15,23 +16,22 @@ app.use((req, res, next) => {
   next();
 });
 
+// Keep /demo for direct static serving while / stays the primary demo entry.
 app.use('/demo', express.static(path.join(__dirname, '../public')));
 
-// Register prediction-related routes under /api
 app.use('/api', predictRoutes);
 
-// Keep a simple health endpoint under /api/health.
 app.get('/api/health', (req, res) => {
     res.status(200).json({
         message: 'RealVision API running'
     });
 });
 
-// Serve the demo page at root.
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, '../public/index.html'));
 });
 
+// Last in chain so thrown/forwarded errors return JSON consistently.
 app.use(errorMiddleware);
 
 module.exports = app;
