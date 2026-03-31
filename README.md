@@ -1,6 +1,7 @@
 # RealVision Backend API
 
 Live Demo: [View the app here](https://realvision-deepfake-detection-backend.onrender.com)
+---
 Backend-first project for the RealVision system, designed to support video upload, validation, and a minimal frontend demo for real/fake video prediction using mock inference logic.
 
 ![RealVision Demo](images/demo.png)
@@ -108,7 +109,6 @@ The backend and demo frontend are working end-to-end, and the next major step is
 
 ## Planned Improvements
 - Replace mock inference with real model integration
-- Deploy the project for external access
 - Improve frontend UI/UX further
 - Consider optional persistence/history only if needed
 
