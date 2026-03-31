@@ -1,6 +1,10 @@
 const http = require('http');
+const fs = require('fs');
 const app = require('./app');
 const config = require('./config');
+
+// Ensure upload destination exists in ephemeral runtimes (e.g. Render).
+fs.mkdirSync(config.uploadsDir, { recursive: true });
 
 const server = http.createServer(app);
 
