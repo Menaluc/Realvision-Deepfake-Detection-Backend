@@ -1,91 +1,44 @@
-const express = require('express') // import
+const express = require('express');
 const multer = require('multer');
 const path = require('path');
-const fs = require('fs');
-const { runInference } = require('../services/inference.service');
-const router = express.Router() // creat router
+const config = require('../config');
+const predictController = require('../controllers/predict.controller');
 
-// Where to save the uploaded file
+const router = express.Router();
+
 const storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-        cb(null, "uploads/")
+  destination: function (req, file, cb) {
+    cb(null, config.uploadsDir);
+  },
 
-    },
+  filename: function (req, file, cb) {
+    const ext = path.extname(file.originalname);
+    const name = path.basename(file.originalname, ext);
 
-    // Create a unique file name
-    filename: function (req, file, cb) {
-        const ext = path.extname(file.originalname);
-        const name = path.basename(file.originalname, ext);
-
-        cb(null, name + '-' + Date.now() + ext);
-    }
+    cb(null, name + '-' + Date.now() + ext);
+  },
 });
 
-// Accept only video files
 const fileFilter = (req, file, cb) => {
-    if (file.mimetype.startsWith('video/')) {
-        cb(null, true)
-    } else {
-        cb(null, false)
-    }
-}
+  if (file.mimetype.startsWith('video/')) {
+    cb(null, true);
+  } else {
+    cb(null, false);
+  }
+};
 
-// Upload settings
 const upload = multer({
-    storage,
-    fileFilter,
-    limits: {
-        fileSize: 50 * 1024 * 1024 // 50 MB max file size
-    }
+  storage,
+  fileFilter,
+  limits: {
+    fileSize: config.maxFileSize,
+  },
 });
 
-// Upload endpoint for video prediction input
-router.post("/predict", (req, res) => {
-    upload.single('video')(req, res, async function (err) {
-        if (err instanceof multer.MulterError) {
-            console.log(err);
-            return res.status(400).json({
-                message: 'File is too large'
-            });
-        }
-
-        // Handle unexpected upload errorr
-        else if (err) {
-            return res.status(400).json({
-                message: 'Upload error'
-            });
-        }
-
-        // Handle missing or invalid file
-        if (!req.file) {
-            return res.status(400).json({
-                message: 'No valid video file provided'
-            })
-        }
-
-        const videoPath = req.file.path;
-
-        try {
-            const inferenceResult = await runInference(videoPath);
-            return res.status(200).json({
-                message: 'Prediction successful',
-                prediction: inferenceResult.prediction,
-                confidence: inferenceResult.confidence,
-            });
-        } catch (e) {
-            return res.status(500).json({
-                message: 'Inference failed',
-                prediction: null,
-                confidence: null,
-            });
-        } finally {
-            // Temporary cleanup after inference (success or failure).
-            fs.unlink(videoPath, (unlinkErr) => {
-                if (unlinkErr) console.error('Failed to delete temp file:', unlinkErr.message);
-            });
-        }
-    });
+router.post('/predict', (req, res, next) => {
+  upload.single('video')(req, res, (err) => {
+    predictController.predict(req, res, err).catch(next);
+  });
 });
 
-module.exports = router
-
+module.exports = router;

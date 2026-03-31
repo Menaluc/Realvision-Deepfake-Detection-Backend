@@ -1,12 +1,13 @@
 const http = require('http');
 const app = require('./app');
-const port = 3000;
+const config = require('./config');
 
-// Create HTTP server from the Express app
 const server = http.createServer(app);
 
-// Create HTTP server from the Express app
-server.listen(port, () => {
-    console.log(`Server running on port ${port}`);
+// Bind to all interfaces so the server is reachable in container/cloud environments (e.g. Render).
+const host = '0.0.0.0';
+
+server.listen(config.port, host, () => {
+    console.log(`Server running on http://${host}:${config.port}`);
 });
 

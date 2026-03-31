@@ -1,3 +1,11 @@
 node_modules/
 uploads/
 .env
+
+# OS / editor noise
+.DS_Store
+Thumbs.db
+
+# Browser “Save page” duplicates of public/demo (canonical UI is public/index.html)
+RealVision Backend API - Demo.html
+RealVision Backend API - Demo_files/

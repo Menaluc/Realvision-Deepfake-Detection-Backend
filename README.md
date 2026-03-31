@@ -1,6 +1,10 @@
 # RealVision Backend API
 
-Backend-first project for the RealVision system, designed to support video upload, validation, Python-based inference flow, and a minimal frontend demo for real/fake video prediction.
+Live Demo: [View the app here](...)
+
+![RealVision Demo](images/demo.png)
+
+Backend-first project for the RealVision system, designed to support video upload, validation, and a minimal frontend demo for real/fake video prediction using mock inference logic.
 
 ---
 
@@ -8,18 +12,20 @@ Backend-first project for the RealVision system, designed to support video uploa
 - Node.js
 - Express.js
 - Multer
-- Python
 - Vanilla HTML / CSS / JavaScript
 
 ## Current Endpoints
-- `GET /` - API health check
-- `POST /api/predict` - upload a video file, validate it, run Python mock inference, and return prediction JSON
+- `GET /` - serves the frontend demo page
+- `GET /api/health` - API health check
+- `POST /api/predict` - upload a video file, validate it, run mock inference, and return prediction JSON
 
 ## Run Locally
 ```bash
 npm install
-node src/server.js
+npm start
 ```
+
+Same as production-style runs: `npm start` runs `node src/server.js`. Render sets `PORT` automatically; locally it defaults to `3000` via `src/config/index.js`.
 ## Current Functionality
 - Express backend setup
 
@@ -33,7 +39,7 @@ node src/server.js
 
 - File size limit (50MB)
 
-- Python mock inference integration
+- Mock inference integration (no Python required to run this demo)
 
 - Prediction response with:
 
@@ -52,10 +58,11 @@ node src/server.js
 ```
 {
   "message": "Prediction successful",
-  "prediction": "real",
+  "prediction": "fake",
   "confidence": 0.87
 }
 ```
+Note: This is an example shape only. In demo mode, prediction/confidence values vary per request.
 
 ### Validation Examples
 
@@ -77,7 +84,7 @@ Files that exceed the configured size limit are rejected with an error response.
 ### Successful prediction flow
 
 
-A valid video file is accepted, processed through the Python mock inference layer, and returns a prediction response.
+A valid video file is accepted, processed through the mock inference layer, and returns a prediction response.
 
 ## Frontend Demo
 
@@ -96,8 +103,8 @@ The project includes a minimal frontend demo that allows a user to:
 
 ## Project Status
 
-This project currently uses a Python mock inference layer.
-The backend and demo frontend are working end-to-end, and the next major step would be replacing the mock inference with the real trained model.
+This project currently uses a backend mock inference layer for demo purposes.
+The backend and demo frontend are working end-to-end, and the next major step is integrating the real trained model (for example via Python/ML inference).
 
 ## Planned Improvements
 - Replace mock inference with real model integration
