@@ -49,7 +49,7 @@ async function predict(req, res, err) {
       confidence: null,
     });
   } finally {
-    // Uploaded files are temporary; always attempt cleanup.
+    // Uploaded files are temporary. always attempt cleanup.
     unlinkQuietly(videoPath);
   }
 }

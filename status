@@ -1,0 +1,132 @@
+[1mdiff --git a/.cursor/skills/deploy-to-railway/SKILL.md b/.cursor/skills/deploy-to-railway/SKILL.md[m
+[1mdeleted file mode 100644[m
+[1mindex 47b860b..0000000[m
+[1m--- a/.cursor/skills/deploy-to-railway/SKILL.md[m
+[1m+++ /dev/null[m
+[36m@@ -1,131 +0,0 @@[m
+[31m----[m
+[31m-name: deploy-to-render[m
+[31m-description: >-[m
+[31m-  Render deployment, readiness checks, verification, and troubleshooting for the[m
+[31m-  realvision-backend repository (Express demo API with mock inference). Use when[m
+[31m-  deploying to Render, reviewing deployment config, or debugging deploy/runtime[m
+[31m-  issues for this repo only.[m
+[31m----[m
+[31m-[m
+[31m-# Deploy realvision-backend to Render[m
+[31m-[m
+[31m-## 1. When to use this skill[m
+[31m-[m
+[31m-Use when the user or task involves:[m
+[31m-[m
+[31m-- Deploying this repository to [Render](https://render.com/)[m
+[31m-- Verifying the service is Render-ready (build/start, `PORT`, health checks)[m
+[31m-- Debugging deploy failures, crashes, or wrong URLs after deploy[m
+[31m-- Deciding what **not** to change for deployment (guardrails)[m
+[31m-[m
+[31m-Do **not** use this skill to invent architecture: follow only what exists in this repo.[m
+[31m-[m
+[31m-## 2. What this project is (as of this repo)[m
+[31m-[m
+[31m-- **Small Node.js backend demo**, not a full production ML platform.[m
+[31m-- **Express** (`express` ^5.2.1) with **Multer** for video uploads.[m
+[31m-- **Mock inference only**: `src/services/inference.service.js` returns randomized demo JSON (`prediction` as `real`/`fake`, confidence in a demo range). No Python process or ML runtime is required for the app to work.[m
+[31m-- **Static demo UI** from `public/` (`GET /` serves `public/index.html`; `GET /demo` also serves the same static tree under `/demo`).[m
+[31m-- **No database** in the codebase.[m
+[31m-- **No Docker** files in the repo root (no `Dockerfile` to rely on unless the user adds one later).[m
+[31m-[m
+[31m-## 3. Deployment-relevant structure (actual paths)[m
+[31m-[m
+[31m-Relevant layout for Render:[m
+[31m-[m
+[31m-```text[m
+[31m-package.json              # scripts: start, dev[m
+[31m-package-lock.json         # lockfile present[m
+[31m-src/[m
+[31m-  server.js               # HTTP server entry (listens on config.port)[m
+[31m-  app.js                  # Express app: routes, static, error middleware[m
+[31m-  config/index.js         # port, upload limits, uploads directory[m
+[31m-  routes/predict.routes.js[m
+[31m-  controllers/predict.controller.js[m
+[31m-  services/inference.service.js[m
+[31m-  middleware/error.middleware.js[m
+[31m-  utils/file.utils.js[m
+[31m-public/                   # frontend assets for /[m
+[31m-uploads/                  # runtime upload dir (gitignored); ephemeral on Render[m
+[31m-```[m
+[31m-[m
+[31m-Ignore for **runtime** deployment needs (not required to serve the app): `images/`, `RealVision Backend API - Demo.html`, `RealVision Backend API - Demo_files/`.[m
+[31m-[m
+[31m-## 4. Files to inspect for Render readiness[m
+[31m-[m
+[31m-| File | Why |[m
+[31m-|------|-----|[m
+[31m-| `package.json` | Must expose **`start`**: `"node src/server.js"`. Dependencies: `express`, `multer`. |[m
+[31m-| `src/config/index.js` | **`port`**: must use `process.env.PORT` (Render sets this). |[m
+[31m-| `src/server.js` | Binds `http.createServer(app)` to `config.port`. |[m
+[31m-| `src/app.js` | Routes and static files; confirm no missing paths for production. |[m
+[31m-| `.gitignore` | `node_modules/`, `uploads/`, `.env` — expect fresh `npm install` on Render; uploads are not persisted by default. |[m
+[31m-[m
+[31m-Do **not** assume extra services or env files unless the user adds them.[m
+[31m-[m
+[31m-## 5. Build / start expectations (Render)[m
+[31m-[m
+[31m-- **Root directory**: repository root (single `package.json` — not a monorepo).[m
+[31m-- **Service type**: Render **Web Service**.[m
+[31m-- **Deploy flow**: connect GitHub repo, set Build Command and Start Command, then Render auto-deploys on push.[m
+[31m-- **Build Command**: `npm install` (or leave default if Render detects Node and installs from `package-lock.json`).[m
+[31m-- **Start Command**: `npm start` → `node src/server.js` (preferred over custom commands unless the user overrides intentionally).[m
+[31m-- **No custom build step** is defined in `package.json` beyond install; no compile step.[m
+[31m-[m
+[31m-If the user changes `start`, keep it aligned with `main` / actual entry: **`src/server.js`**.[m
+[31m-[m
+[31m-## 6. Runtime expectations[m
+[31m-[m
+[31m-- The process must **listen on `process.env.PORT`** (wired via `src/config/index.js`). Default local fallback is `3000`.[m
+[31m-- **Ephemeral filesystem**: `uploads/` is used for temporary Multer storage; Render disk is not durable across restarts/redeploys. The demo **deletes** the file after handling (`unlinkQuietly` in `src/utils/file.utils.js`). Do not assume persistent user files without external storage.[m
+[31m-- **Request size**: uploads capped at **50 MB** (`config.maxFileSize`). Larger uploads will fail with Multer / route behavior as today.[m
+[31m-- **Endpoints** (for smoke tests):[m
+[31m-  - `GET /` — HTML demo[m
+[31m-  - `GET /api/health` — JSON: `{ "message": "RealVision API running" }`[m
+[31m-  - `POST /api/predict` — multipart field **`video`**, video MIME types only[m
+[31m-[m
+[31m-## 7. Environment variables[m
+[31m-[m
+[31m-**Required for Render:** none beyond what Render provides (**`PORT`** is set automatically).[m
+[31m-[m
+[31m-**Optional / future** (not referenced in current code unless added later): any custom vars should be documented in README if introduced. Current `src/config/index.js` only uses:[m
+[31m-[m
+[31m-- `PORT` — via `process.env.PORT || 3000`[m
+[31m-[m
+[31m-Do **not** tell the user to set `PYTHON_PATH` or ML-related vars for the **current** mock inference.[m
+[31m-[m
+[31m-## 8. Deployment verification checklist[m
+[31m-[m
+[31m-After deploy:[m
+[31m-[m
+[31m-1. Open the Render **public URL** + `/api/health` → expect **200** and JSON message above.[m
+[31m-2. Open `/` → demo page loads (static + Express).[m
+[31m-3. From the UI or `curl`, **`POST /api/predict`** with a small video → **200** and `prediction` / `confidence` fields (mock values in demo range).[m
+[31m-4. Confirm logs show **no crash** on boot (e.g. “Server running on ...” with Render’s injected port).[m
+[31m-5. If the service is on a free tier, account for **cold starts/sleep** after inactivity before first response.[m
+[31m-6. Remember: **uploads are temporary**; do not expect files to remain on disk.[m
+[31m-[m
+[31m-## 9. Troubleshooting (common, repo-specific)[m
+[31m-[m
+[31m-| Symptom | Likely cause | What to check |[m
+[31m-|---------|----------------|---------------|[m
+[31m-| App exits immediately / “listening” wrong port | Not binding to `PORT` | `src/config/index.js` and `src/server.js` |[m
+[31m-| 404 on `/` | Wrong service root or static path | `src/app.js`, `public/index.html` exists |[m
+[31m-| Health works, predict fails | Wrong field name or non-video | Field must be **`video`**; MIME must start with `video/` |[m
+[31m-| 413 / “File is too large” | Multer limit | `config.maxFileSize` (50 MB) |[m
+[31m-| “Cannot GET …” for API | Wrong path | API is under **`/api/...`** (e.g. `/api/predict`, `/api/health`) |[m
+[31m-| Build fails | Missing lockfile or Node version | `package-lock.json`, Render Node version settings |[m
+[31m-| First request is slow / timeout after idle | Free tier cold start | Wait for spin-up, then retry `/api/health` |[m
+[31m-[m
+[31m-## 10. Guardrails — do not over-change deployment[m
+[31m-[m
+[31m-Unless the user explicitly asks:[m
+[31m-[m
+[31m-- **Do not** add a database, Redis, auth, or background workers “for Render.”[m
+[31m-- **Do not** add Docker, docker-compose, or split into multiple Render services by default.[m
+[31m-- **Do not** assume Python or GPU; inference in **`src/services/inference.service.js`** is mock-only in Node unle
