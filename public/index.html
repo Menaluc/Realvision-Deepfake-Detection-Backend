@@ -145,6 +145,13 @@
         outline-offset: 2px;
       }
 
+      .upload-hint {
+        margin: 8px 0 0;
+        font-size: 0.75rem;
+        line-height: 1.45;
+        color: var(--muted);
+      }
+
       button {
         margin-top: 18px;
         padding: 12px 16px;
@@ -395,6 +402,13 @@
         color: rgba(167, 243, 208, 0.85);
       }
 
+      .xai-meta {
+        margin: -2px 0 10px;
+        font-size: 0.75rem;
+        line-height: 1.4;
+        color: var(--muted);
+      }
+
       .xai-lead {
         margin: 0 0 14px;
         font-size: 0.9375rem;
@@ -610,6 +624,7 @@
         <form id="predictForm">
           <label id="upload-label" for="videoInput">Choose a video</label>
           <input id="videoInput" name="video" type="file" accept="video/*" />
+          <p class="upload-hint">Video files only · Max size: 50 MB</p>
           <div id="previewWrap" class="preview-wrap" hidden>
             <div id="previewMeta" class="preview-meta"></div>
             <video
@@ -628,7 +643,8 @@
     </div>
 
     <script>
-      /** POST target: same origin when served from the app; otherwise hit the local API (file:// or Live Server). */
+      /** POST target: same origin when served from the app
+       *  otherwise hit the local API (file:// or Live Server). */
       function getPredictUrl() {
         if (window.location.protocol === 'file:') {
           return 'http://localhost:3000/api/predict';
@@ -649,7 +665,8 @@
       const previewVideo = document.getElementById('previewVideo');
       const previewMeta = document.getElementById('previewMeta');
 
-      // Object URLs reference the selected File in memory; revoke when discarding so the tab does not leak blob handles.
+      // Object URLs reference the selected File in memory
+      //  and revoke when discarding so the tab does not leak blob handles.
       let previewObjectUrl = null;
 
       function revokePreviewUrl() {
@@ -676,7 +693,8 @@
         return (bytes / (u * u * u)).toFixed(1) + ' GB';
       }
 
-      // Drive the local <video> preview from the file input without uploading; createObjectURL bridges File → playable src.
+      // Drive the local <video> preview from the file input without uploading
+      //  and createObjectURL bridges File → playable src.
       function syncPreviewFromInput() {
         revokePreviewUrl();
         var file = videoInput.files && videoInput.files[0];
@@ -712,22 +730,22 @@
         if (tone === 'fake') {
           return {
             lead:
-              'Several visual cues point to editing or synthesis—small inconsistencies that are easy to miss in a single frame but stand out across the full clip.',
+              'Several visual cues point to manipulation or synthesis: small inconsistencies that may be easy to miss in a single frame but become more noticeable across the full clip.',
             bullets: [
-              'Uneven details around the face or hair where lighting and texture do not line up smoothly',
-              'Facial motion or blinking that looks slightly off compared with the rest of the scene',
-              'Brief moments where the image looks unnaturally smooth, stretched, or “patched” between frames',
+              'Uneven facial or hair details.',
+              'Facial motion or blinking that looks slightly off compared with the rest of the scene.',
+              'Brief moments where the image looks unnaturally smooth, stretched, or “patched” between frames.',
             ],
           };
         }
         if (tone === 'real') {
           return {
             lead:
-              'The footage lines up the way we expect from an unaltered video: timing, texture, and movement feel steady and natural from start to finish.',
+              'The footage matches patterns commonly seen in authentic video: steady motion, consistent texture, and natural timing throughout the clip.',
             bullets: [
-              'Expressions and head motion stay believable as angles and lighting change',
-              'Background and skin detail stay consistent without sudden jumps or smearing',
-              'Rhythm of the clip—pacing, focus, and micro-movements—matches typical authentic recordings',
+              'Expressions and head motion remain natural',
+              'Background and skin detail stay consistent',
+              'Rhythm and micro-movements remain stable across frames',
             ],
           };
         }
@@ -842,6 +860,7 @@
             '</div>' +
             '<div class="xai-section">' +
             '<h3 class="xai-title">Why this prediction?</h3>' +
+            '<p class="xai-meta">Model-style explanation</p>' +
             '<p class="xai-lead">' +
             escapeHtml(xai.lead) +
             '</p>' +
@@ -871,7 +890,8 @@
         }
       }
 
-      // Multipart POST to /api/predict; URL logic covers file:// and dev servers not on :3000.
+      // Multipart POST to /api/predict
+      //  and URL logic covers file:// and dev servers not on :3000.
       form.addEventListener('submit', async (e) => {
         e.preventDefault();
 
