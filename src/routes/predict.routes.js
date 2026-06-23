@@ -1,6 +1,7 @@
 const express = require('express');
 const multer = require('multer');
 const path = require('path');
+const crypto = require('crypto');
 const config = require('../config');
 const predictController = require('../controllers/predict.controller');
 
@@ -12,20 +13,20 @@ const storage = multer.diskStorage({
     cb(null, config.uploadsDir);
   },
 
+  // Filename is generated, not derived from user input, to avoid unsafe/predictable paths.
+  // fileFilter runs before this and already validated the extension is allowed.
   filename: function (req, file, cb) {
-    const ext = path.extname(file.originalname);
-    const name = path.basename(file.originalname, ext);
-
-    cb(null, name + '-' + Date.now() + ext);
+    const ext = path.extname(file.originalname).toLowerCase();
+    cb(null, crypto.randomUUID() + ext);
   },
 });
 
 const fileFilter = (req, file, cb) => {
-  if (file.mimetype.startsWith('video/')) {
-    cb(null, true);
-  } else {
-    cb(null, false);
-  }
+  const ext = path.extname(file.originalname).toLowerCase();
+  const isAllowedMimetype = file.mimetype.startsWith('video/');
+  const isAllowedExtension = config.allowedExtensions.includes(ext);
+
+  cb(null, isAllowedMimetype && isAllowedExtension);
 };
 
 const upload = multer({
