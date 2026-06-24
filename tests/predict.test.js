@@ -22,6 +22,18 @@ describe('POST /api/predict', () => {
     expect(res.body).toEqual({ message: 'No valid video file provided' });
   });
 
+  it('returns 400 when the extension is disallowed, even with a spoofed video mimetype', async () => {
+    const res = await request(app)
+      .post('/api/predict')
+      .attach('video', NON_VIDEO_FIXTURE, {
+        filename: 'malicious.exe',
+        contentType: 'video/mp4',
+      });
+
+    expect(res.status).toBe(400);
+    expect(res.body).toEqual({ message: 'No valid video file provided' });
+  });
+
   it('returns 200 with a mock prediction for a valid video upload', async () => {
     const res = await request(app)
       .post('/api/predict')
